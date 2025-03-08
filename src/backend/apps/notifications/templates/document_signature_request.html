@@ -1,0 +1,101 @@
+{% extends "../../templates/emails/base.html" %}
+
+{% block styles %}
+{{ block.super }}
+/* Additional styles for document signature request email */
+.document-list {
+    background-color: #f5f9ff;
+    border-left: 4px solid #1976D2;
+    padding: 15px;
+    margin: 20px 0;
+    border-radius: 4px;
+}
+
+.instructions {
+    background-color: #f5f5f5;
+    padding: 15px;
+    margin: 20px 0;
+    border-radius: 4px;
+}
+
+.instructions ol {
+    padding-left: 20px;
+    margin-bottom: 0;
+}
+
+.instructions li {
+    margin-bottom: 8px;
+}
+
+.expiration-notice {
+    background-color: #fff8e1;
+    border-left: 4px solid #FFA000;
+    padding: 15px;
+    margin: 20px 0;
+    border-radius: 4px;
+}
+
+.button-container {
+    text-align: center;
+    margin: 25px 0;
+}
+
+.button {
+    background-color: #388E3C;
+    color: #FFFFFF;
+    padding: 12px 24px;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    display: inline-block;
+}
+
+.support-info {
+    margin-top: 30px;
+    padding: 15px;
+    background-color: #f5f5f5;
+    border-radius: 4px;
+}
+{% endblock %}
+
+{% block content %}
+<h1>Documents Ready for Your Signature</h1>
+
+<p>Dear {{recipient_name}},</p>
+
+<p>The following documents for loan application {{application_id}} ({{program_name}} at {{school_name}}) are now ready for your electronic signature.</p>
+
+<div class="document-list">
+  <h2>Documents to Sign</h2>
+  <ul>
+    {% for document_type in document_types %}
+    <li>{{document_type}}</li>
+    {% endfor %}
+  </ul>
+</div>
+
+<div class="instructions">
+  <h2>Signing Instructions</h2>
+  <ol>
+    <li>Click the "Sign Documents" button below</li>
+    <li>You will be directed to DocuSign to complete the signing process</li>
+    <li>Follow the on-screen instructions to review and sign each document</li>
+    <li>Once complete, you will receive a confirmation email with copies of the signed documents</li>
+  </ol>
+</div>
+
+<div class="expiration-notice">
+  <p><strong>Important:</strong> This signature request will expire on {{expiration_date}}. Please complete the signing process before this date to avoid delays in your loan processing.</p>
+</div>
+
+<div class="button-container">
+  <a href="{{signing_url}}" class="button">Sign Documents</a>
+</div>
+
+<div class="support-info">
+  <p>If you have any questions or need assistance with the signature process, please contact our support team at <a href="mailto:support@loanmanagementsystem.com">support@loanmanagementsystem.com</a> or call us at (555) 123-4567.</p>
+</div>
+
+<p>Thank you for your prompt attention to this matter.</p>
+<p>Sincerely,<br>The Loan Management Team</p>
+{% endblock %}
