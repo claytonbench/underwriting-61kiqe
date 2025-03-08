@@ -1,0 +1,187 @@
+# =====================================================
+# Kibana Configuration for Loan Management System
+# Kibana Version: 7.17.0
+# =====================================================
+
+# =====================================================
+# Server Configuration
+# =====================================================
+server:
+  # The host to bind the server to
+  host: "0.0.0.0"
+  
+  # The port to bind the server to
+  port: 5601
+  
+  # The name used to identify this Kibana instance
+  name: "loan-management-kibana"
+  
+  # Base path for the Kibana URL (useful when hosting behind a proxy)
+  basePath: ""
+  
+  # Public URL for Kibana - used for generating links
+  publicBaseUrl: "${KIBANA_PUBLIC_URL:https://kibana.example.com}"
+  
+  # SSL Configuration
+  ssl:
+    enabled: true
+    certificate: "/etc/kibana/certificates/kibana.crt"
+    key: "/etc/kibana/certificates/kibana.key"
+
+# =====================================================
+# Elasticsearch Connection
+# =====================================================
+elasticsearch:
+  # Array of Elasticsearch hosts to connect to
+  hosts: ["https://${ELASTICSEARCH_HOST:elasticsearch}:${ELASTICSEARCH_PORT:9200}"]
+  
+  # Elasticsearch authentication credentials
+  username: "${ELASTICSEARCH_USERNAME:elastic}"
+  password: "${ELASTICSEARCH_PASSWORD}"
+  
+  # SSL settings for Elasticsearch connection
+  ssl:
+    certificateAuthorities: ["/etc/kibana/certificates/ca.crt"]
+    verificationMode: "certificate"
+  
+  # Name of the Elasticsearch cluster
+  clusterName: "${ELASTICSEARCH_CLUSTER_NAME:loan-management-cluster}"
+
+# =====================================================
+# Kibana Core Settings
+# =====================================================
+kibana:
+  # The name of the index used to store Kibana's configuration
+  index: ".kibana"
+  
+  # The default application to load when accessing Kibana
+  defaultAppId: "discover"
+
+# =====================================================
+# X-Pack Features
+# =====================================================
+xpack:
+  # Security features (authentication, authorization, etc.)
+  security:
+    enabled: "${SECURITY_ENABLED:true}"
+    encryptionKey: "${KIBANA_ENCRYPTION_KEY}"
+    session:
+      idleTimeout: "1h"
+      lifespan: "24h"
+  
+  # Reporting features for generating PDF/CSV reports
+  reporting:
+    enabled: true
+    encryptionKey: "${KIBANA_REPORTING_KEY}"
+    capture:
+      timeouts:
+        waitForElements: 30000
+    csv:
+      maxSizeBytes: 10485760
+    roles:
+      enabled: true
+  
+  # X-Pack monitoring of the Elastic Stack
+  monitoring:
+    enabled: true
+    ui:
+      container:
+        elasticsearch:
+          enabled: true
+  
+  # Spaces feature for multi-tenancy support
+  spaces:
+    enabled: true
+  
+  # Application Performance Monitoring UI
+  apm:
+    ui:
+      enabled: true
+
+# =====================================================
+# Logging Configuration
+# =====================================================
+logging:
+  appenders:
+    file:
+      type: file
+      fileName: "/var/log/kibana/kibana.log"
+      layout:
+        type: "json"
+  root:
+    appenders: ["file"]
+    level: "info"
+
+# =====================================================
+# Saved Objects Configuration
+# =====================================================
+savedObjects:
+  # Maximum size for import/export operations
+  maxImportPayloadBytes: 26214400
+
+# =====================================================
+# Map Configuration
+# =====================================================
+map:
+  # Disable Elastic Maps Service for internal deployment
+  includeElasticMapsService: false
+
+# =====================================================
+# Telemetry Configuration
+# =====================================================
+telemetry:
+  # Disable telemetry data collection
+  enabled: false
+
+# =====================================================
+# Notes on Environment Variables
+# =====================================================
+# KIBANA_PUBLIC_URL:         Public URL for Kibana access (default: https://kibana.example.com)
+# ELASTICSEARCH_HOST:        Hostname or IP address for Elasticsearch (default: elasticsearch)
+# ELASTICSEARCH_PORT:        Port for Elasticsearch (default: 9200)
+# ELASTICSEARCH_USERNAME:    Username for Elasticsearch authentication (default: elastic)
+# ELASTICSEARCH_PASSWORD:    Password for Elasticsearch authentication
+# ELASTICSEARCH_CLUSTER_NAME: Name of the Elasticsearch cluster (default: loan-management-cluster)
+# SECURITY_ENABLED:          Flag to enable/disable security features (default: true)
+# KIBANA_ENCRYPTION_KEY:     Encryption key for Kibana security features
+# KIBANA_REPORTING_KEY:      Encryption key for Kibana reporting features
+# NODE_OPTIONS:              Recommended: --max-old-space-size=2048 to prevent memory issues
+
+# =====================================================
+# Dashboard Types Configured in this Instance
+# =====================================================
+# 1. Operational Dashboards
+#    Purpose: Monitor system health and performance
+#    Users: System administrators, operations team
+#    Visualizations: Service status, error rates, resource utilization, API performance
+#
+# 2. Business Dashboards
+#    Purpose: Track business KPIs and process metrics
+#    Users: Business analysts, management
+#    Visualizations: Application volume, processing times, approval rates, document completion
+#
+# 3. Security Dashboards
+#    Purpose: Monitor security events and compliance
+#    Users: Security team, compliance officers
+#    Visualizations: Authentication events, authorization failures, suspicious activities
+#
+# 4. Executive Dashboards
+#    Purpose: High-level system and business overview
+#    Users: Executive management
+#    Visualizations: System health summary, KPIs, SLA compliance, business trends
+
+# =====================================================
+# Index Patterns
+# =====================================================
+# application-logs-*: Application logs from backend services (30 days retention)
+# api-logs-*:         API request and response logs (30 days retention)
+# security-logs-*:    Security-related events and audit logs (90 days retention)
+# aws-logs-*:         AWS infrastructure logs from CloudWatch (30 days retention)
+
+# =====================================================
+# Performance Considerations
+# =====================================================
+# Memory Requirements: 2GB minimum, 4GB recommended
+# CPU Requirements: 2 vCPU minimum
+# Node Options: --max-old-space-size=2048 to prevent memory issues
+# Concurrent Users: Supports up to 50 concurrent users with recommended resources
