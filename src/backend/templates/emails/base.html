@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Loan Management System</title>
+    <style type="text/css">
+        {% block styles %}
+        /* Base styles */
+        body, html {
+            font-family: Roboto, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-size: 14px;
+            line-height: 1.5;
+            color: #212121;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+            width: 100% !important;
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+        }
+        
+        /* Typography */
+        h1 {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1976D2;
+            margin: 0 0 20px 0;
+            line-height: 1.2;
+        }
+        
+        h2 {
+            font-size: 20px;
+            font-weight: bold;
+            color: #212121;
+            margin: 25px 0 15px 0;
+            line-height: 1.2;
+        }
+        
+        h3 {
+            font-size: 18px;
+            font-weight: bold;
+            color: #212121;
+            margin: 20px 0 10px 0;
+            line-height: 1.3;
+        }
+        
+        h4 {
+            font-size: 16px;
+            font-weight: bold;
+            color: #212121;
+            margin: 15px 0 10px 0;
+            line-height: 1.3;
+        }
+        
+        p {
+            margin: 0 0 15px 0;
+            line-height: 1.6;
+        }
+        
+        a {
+            color: #1976D2;
+            text-decoration: underline;
+        }
+        
+        a:hover {
+            text-decoration: none;
+        }
+        
+        /* Container & Layout */
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 4px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .email-header {
+            background-color: #1976D2;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .email-logo {
+            max-width: 200px;
+            height: auto;
+        }
+        
+        .email-content {
+            padding: 30px 20px;
+            background-color: #ffffff;
+        }
+        
+        .email-footer {
+            padding: 20px;
+            background-color: #f5f5f5;
+            font-size: 12px;
+            color: #757575;
+            text-align: center;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        /* Component Styles */
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #1976D2;
+            color: #ffffff !important;
+            text-decoration: none !important;
+            border-radius: 4px;
+            font-weight: bold;
+            text-align: center;
+            margin: 15px 0;
+        }
+        
+        .button:hover {
+            background-color: #1565C0;
+        }
+        
+        .info-box {
+            background-color: #f5f9ff;
+            border-left: 4px solid #1976D2;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        .warning-box {
+            background-color: #fff9f0;
+            border-left: 4px solid #FFA000;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        .error-box {
+            background-color: #fff5f5;
+            border-left: 4px solid #D32F2F;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        .success-box {
+            background-color: #f5fff9;
+            border-left: 4px solid #388E3C;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        .divider {
+            border-top: 1px solid #e0e0e0;
+            margin: 25px 0;
+        }
+        
+        /* Tables */
+        table {
+            border-collapse: collapse;
+            mso-table-lspace: 0pt;
+            mso-table-rspace: 0pt;
+            width: 100%;
+        }
+        
+        table td {
+            vertical-align: top;
+        }
+        
+        .data-table {
+            width: 100%;
+            margin-bottom: 20px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .data-table th {
+            background-color: #f5f5f5;
+            padding: 10px;
+            text-align: left;
+            font-weight: bold;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .data-table td {
+            padding: 10px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        /* Utility Classes */
+        .center {
+            text-align: center;
+        }
+        
+        .right {
+            text-align: right;
+        }
+        
+        .left {
+            text-align: left;
+        }
+        
+        .bold {
+            font-weight: bold;
+        }
+        
+        .mt-0 { margin-top: 0 !important; }
+        .mt-10 { margin-top: 10px !important; }
+        .mt-20 { margin-top: 20px !important; }
+        .mb-0 { margin-bottom: 0 !important; }
+        .mb-10 { margin-bottom: 10px !important; }
+        .mb-20 { margin-bottom: 20px !important; }
+        
+        /* Responsive Styles */
+        @media screen and (max-width: 480px) {
+            .email-container {
+                width: 100% !important;
+                margin: 0 !important;
+            }
+            
+            .email-content {
+                padding: 20px 15px !important;
+            }
+            
+            .button {
+                display: block !important;
+                width: 100% !important;
+            }
+            
+            h1 {
+                font-size: 22px !important;
+            }
+            
+            h2 {
+                font-size: 18px !important;
+            }
+            
+            .data-table th, 
+            .data-table td {
+                padding: 8px !important;
+            }
+        }
+        {% endblock %}
+    </style>
+</head>
+<body>
+    <!-- Email Container Table -->
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #f5f5f5;">
+        <tr>
+            <td align="center" valign="top" style="padding: 20px 10px;">
+                <!-- Email Content Table -->
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" class="email-container">
+                    <!-- Header -->
+                    <tr>
+                        <td class="email-header">
+                            <img src="https://example.com/logo.png" alt="Loan Management System Logo" class="email-logo" width="200">
+                        </td>
+                    </tr>
+                    
+                    <!-- Content -->
+                    <tr>
+                        <td class="email-content">
+                            {% block content %}
+                            <!-- Default content - should be overridden by child templates -->
+                            <h1>Email Notification</h1>
+                            <p>This is a placeholder email content. If you're seeing this message, the specific email template has not properly extended the base template.</p>
+                            {% endblock %}
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer -->
+                    <tr>
+                        <td class="email-footer">
+                            <p>&copy; {% now "Y" %} Loan Management System. All rights reserved.</p>
+                            <p>123 Financial Street, Suite 400<br>Anytown, ST 12345<br>Phone: (555) 123-4567</p>
+                            <p>This email was sent to {{recipient_email}}.</p>
+                            <p>
+                                <a href="{{unsubscribe_url}}" style="color: #757575;">Manage notification preferences</a> | 
+                                <a href="{{privacy_url}}" style="color: #757575;">Privacy Policy</a>
+                            </p>
+                            <p style="margin-top: 15px; font-size: 11px;">
+                                This message contains confidential information and is intended only for the individual named.
+                                If you are not the named recipient, you should not disseminate, distribute, or copy this email.
+                                Please notify the sender immediately by email if you have received this email by mistake and
+                                delete this email from your system.
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
