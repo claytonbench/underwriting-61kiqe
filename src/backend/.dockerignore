@@ -1,0 +1,59 @@
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments and environment files
+env/
+venv/
+.env
+.env.*
+
+# Logs
+*.log
+logs/
+
+# Version control
+.git/
+.gitignore
+.github/
+
+# Testing and coverage
+.pytest_cache/
+.coverage
+htmlcov/
+tests/
+
+# Database files
+*.sqlite3
+*.db
+
+# Media and static files
+media/
+staticfiles/
+
+# Node.js and build artifacts
+node_modules/
+dist/
+build/
+*.egg-info/
+*.egg
+
+# Docker files
+docker-compose*.yml
+Dockerfile*
+.dockerignore
+
+# Documentation
+README.md
+LICENSE
+docs/
+
+# Configuration files
+requirements-dev.txt
+tox.ini
+pytest.ini
+.flake8
+setup.cfg
+setup.py
