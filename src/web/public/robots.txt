@@ -1,0 +1,25 @@
+# This file provides instructions for web crawlers/robots about which parts of the site they are allowed to access.
+
+User-agent: *
+
+# Disallow access to sensitive areas containing personal and financial information
+Disallow: /dashboard/
+Disallow: /application/
+Disallow: /documents/
+Disallow: /underwriting/
+Disallow: /qc/
+Disallow: /funding/
+Disallow: /reports/
+Disallow: /settings/
+Disallow: /users/
+
+# Allow access to public pages
+Allow: /
+Allow: /login
+Allow: /forgot-password
+
+# Disallow all bots from any API paths
+Disallow: /api/
+
+# Sitemap location
+Sitemap: https://example-loan-system.com/sitemap.xml
