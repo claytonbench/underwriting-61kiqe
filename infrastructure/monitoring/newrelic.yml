@@ -1,0 +1,148 @@
+# This file configures the New Relic Python Agent.
+#
+# New Relic Python Agent - version 7.0
+#
+# The configuration is organized into sections for different environments.
+# Common settings apply to all environments unless overridden.
+# Environment-specific settings take precedence over common settings.
+
+common: &default_settings
+  # Common settings shared across all environments
+  
+  # Monitor mode must be true for the agent to report data
+  monitor_mode: true
+
+  # Log settings
+  log_level: info
+  log_file_name: /var/log/newrelic/newrelic-agent.log
+  log_limit_in_kbytes: 10000
+
+  # Security settings
+  ssl: true
+  high_security: true
+
+  # Transaction tracer settings
+  transaction_tracer:
+    enabled: true
+    # Transaction threshold is set to apdex_f which is 4x the apdex_t value
+    transaction_threshold: apdex_f
+    # Record SQL statements but obfuscate sensitive data
+    record_sql: obfuscated
+    # Capture stack traces for slow transactions
+    stack_trace_threshold: 0.5
+    # Enable explain plans
+    explain_enabled: true
+    explain_threshold: 0.5
+
+  # Error collector settings
+  error_collector:
+    enabled: true
+    # Ignore 404 errors
+    ignore_errors: django.http.Http404
+    capture_attributes: true
+
+  # Browser monitoring
+  browser_monitoring:
+    auto_instrument: true
+    capture_attributes: true
+
+  # Distributed tracing settings
+  distributed_tracing:
+    enabled: true
+    exclude_newrelic_header: false
+
+  # Thread profiler settings
+  thread_profiler:
+    enabled: true
+
+  # Cross application tracing
+  cross_application_tracer:
+    enabled: true
+
+  # Attributes settings
+  attributes:
+    enabled: true
+    include:
+      - request.parameters.*
+      - request.headers.contentType
+      - request.method
+      - response.status
+    exclude:
+      # Exclude sensitive information
+      - request.headers.cookie
+      - request.headers.authorization
+      - request.parameters.password
+      - request.parameters.ssn
+      - request.parameters.credit_card
+
+  # Custom insights events
+  custom_insights_events:
+    enabled: true
+    max_samples_stored: 10000
+
+  # Slow SQL settings
+  slow_sql:
+    enabled: true
+    max_samples: 10
+
+# Development environment settings
+development:
+  <<: *default_settings
+  app_name: Loan Management System - Development
+  # License key uses environment variable for security
+  license_key: ${NEW_RELIC_LICENSE_KEY}
+  monitor_mode: true
+  developer_mode: true
+  log_level: debug
+
+# Staging environment settings
+staging:
+  <<: *default_settings
+  app_name: Loan Management System - Staging
+  license_key: ${NEW_RELIC_LICENSE_KEY}
+  monitor_mode: true
+  developer_mode: false
+  log_level: info
+
+# Production environment settings
+production:
+  <<: *default_settings
+  app_name: Loan Management System - Production
+  license_key: ${NEW_RELIC_LICENSE_KEY}
+  monitor_mode: true
+  developer_mode: false
+  log_level: warning
+  high_security: true
+  
+  # Override with stricter settings for production
+  transaction_tracer:
+    record_sql: obfuscated
+  
+  # Custom labels for the application
+  labels:
+    Environment: Production
+  
+  # Apdex target time in seconds
+  # Response time below this threshold is considered satisfactory
+  apdex_t: 0.5
+
+# Application Component Monitoring
+# The following components will be monitored:
+# 1. Web Application: Response time, throughput, error rate, Apdex score
+# 2. API Services: Response time, throughput, error rate, status code distribution
+# 3. Database: Query time, throughput, error rate, connection pool usage
+# 4. External Services: Response time, throughput, error rate, connection failures
+# 5. Background Jobs: Execution time, throughput, error rate, queue time
+#
+# Transaction naming will be configured as follows:
+# - Web Application: Controller/action, Route path
+# - API Services: HTTP method + route path
+# - Database: Database operation + table
+# - External Services: Service name + operation
+# - Background Jobs: Job type + operation
+
+# Integration points
+# - AWS CloudWatch: Complementary infrastructure monitoring
+# - Grafana: Used for visualization of metrics from multiple sources
+# - PagerDuty: Alert notification and incident management
+# - Slack: Team notifications for incidents
