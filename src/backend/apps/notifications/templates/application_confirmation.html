@@ -1,0 +1,112 @@
+{% extends 'emails/base.html' %}
+
+{% block styles %}
+{{ block.super }}
+/* Confirmation-specific styles */
+.confirmation-box {
+    background-color: #f0f9ff;
+    border-left: 4px solid #1976D2;
+    padding: 15px;
+    margin: 20px 0;
+    border-radius: 4px;
+}
+
+.application-details {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+}
+
+.application-details th {
+    text-align: left;
+    padding: 8px;
+    border-bottom: 1px solid #e0e0e0;
+    width: 40%;
+}
+
+.application-details td {
+    padding: 8px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.documents {
+    margin: 15px 0;
+    padding-left: 20px;
+}
+
+.documents li {
+    margin-bottom: 8px;
+}
+
+.button-container {
+    margin: 25px 0;
+    text-align: center;
+}
+
+.button {
+    display: inline-block;
+    padding: 12px 24px;
+    background-color: #1976D2;
+    color: #ffffff;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    text-align: center;
+}
+{% endblock %}
+
+{% block content %}
+<h1>Loan Application Received</h1>
+
+<p>Dear {{ applicant_name }},</p>
+
+<div class="confirmation-box">
+    <p>Thank you for submitting your loan application ({{ application_id }}) for {{ program_name }} at {{ school_name }}. Your application has been received and is now being processed.</p>
+</div>
+
+<h2>Application Details</h2>
+<table class="application-details">
+    <tr>
+        <th>Application ID:</th>
+        <td>{{ application_id }}</td>
+    </tr>
+    <tr>
+        <th>School:</th>
+        <td>{{ school_name }}</td>
+    </tr>
+    <tr>
+        <th>Program:</th>
+        <td>{{ program_name }}</td>
+    </tr>
+    <tr>
+        <th>Requested Amount:</th>
+        <td>{{ requested_amount }}</td>
+    </tr>
+    <tr>
+        <th>Submission Date:</th>
+        <td>{{ submission_date|date:'F j, Y' }}</td>
+    </tr>
+</table>
+
+{% if missing_documents %}
+<h2>Required Documents</h2>
+<p>Please upload the following documents to complete your application:</p>
+<ul class="documents">
+    {% for document in missing_documents %}
+    <li>{{ document }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+
+<h2>Next Steps</h2>
+<p>Your application will now be reviewed by our underwriting team. This process typically takes 24-48 hours. You will receive another email when a decision has been made.</p>
+
+<div class="button-container">
+    <a href="{{ application_url }}" class="button">View Application Details</a>
+</div>
+
+<p>If you have any questions, please contact our support team.</p>
+
+<p>Sincerely,<br>
+The Loan Management Team</p>
+{% endblock %}
