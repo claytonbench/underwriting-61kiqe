@@ -1,0 +1,121 @@
+version: 2
+updates:
+  # Python dependencies for backend
+  - package-ecosystem: "pip"
+    directory: "/src/backend/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    allow:
+      - dependency-type: "direct"
+    assignees:
+      - "security-team"
+    labels:
+      - "dependencies"
+      - "python"
+    commit-message:
+      prefix: "pip"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "backend-team"
+    ignore:
+      - dependency-name: "django"
+        versions: ["4.0.x"]
+    groups:
+      django-packages:
+        patterns:
+          - "django*"
+        exclude-patterns:
+          - "django-debug-toolbar"
+
+  # JavaScript dependencies for frontend
+  - package-ecosystem: "npm"
+    directory: "/src/web/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    allow:
+      - dependency-type: "direct"
+    assignees:
+      - "frontend-team"
+    labels:
+      - "dependencies"
+      - "javascript"
+    commit-message:
+      prefix: "npm"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "frontend-team"
+    groups:
+      react-packages:
+        patterns:
+          - "react*"
+        exclude-patterns:
+          - "react-scripts"
+      material-ui:
+        patterns:
+          - "@mui/*"
+
+  # Terraform dependencies
+  - package-ecosystem: "terraform"
+    directory: "/infrastructure/terraform/"
+    schedule:
+      interval: "monthly"
+    assignees:
+      - "devops-team"
+    labels:
+      - "dependencies"
+      - "terraform"
+    commit-message:
+      prefix: "terraform"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "devops-team"
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    assignees:
+      - "devops-team"
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "github-actions"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "devops-team"
+
+  # Docker for backend
+  - package-ecosystem: "docker"
+    directory: "/src/backend/"
+    schedule:
+      interval: "monthly"
+    assignees:
+      - "devops-team"
+    labels:
+      - "dependencies"
+      - "docker"
+    commit-message:
+      prefix: "docker"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "devops-team"
+
+  # Docker for frontend
+  - package-ecosystem: "docker"
+    directory: "/src/web/"
+    schedule:
+      interval: "monthly"
+    assignees:
+      - "devops-team"
+    labels:
+      - "dependencies"
+      - "docker"
+    commit-message:
+      prefix: "docker"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "devops-team"
