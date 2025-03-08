@@ -1,0 +1,107 @@
+{% extends 'emails/base.html' %}
+
+{% block styles %}
+{{ block.super }}
+/* Funding-specific styles */
+.funding-box {
+    background-color: #f0f9e8;
+    border-left: 4px solid #388E3C;
+    padding: 15px;
+    margin: 20px 0;
+    border-radius: 4px;
+}
+
+.disbursement-details {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+}
+
+.disbursement-details th {
+    text-align: left;
+    padding: 8px;
+    border-bottom: 1px solid #e0e0e0;
+    width: 40%;
+}
+
+.disbursement-details td {
+    padding: 8px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.button-container {
+    margin: 25px 0;
+    text-align: center;
+}
+
+.button {
+    display: inline-block;
+    padding: 12px 24px;
+    background-color: #388E3C;
+    color: #ffffff !important;
+    text-decoration: none !important;
+    border-radius: 4px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.button:hover {
+    background-color: #2E7D32;
+}
+
+.highlight {
+    font-weight: bold;
+    color: #388E3C;
+}
+{% endblock %}
+
+{% block content %}
+<h1>Loan Funding Confirmation</h1>
+
+<p>Dear {{ recipient_name }},</p>
+
+<div class="funding-box">
+    <p>We are pleased to inform you that the loan for <span class="highlight">{{ program_name }}</span> at <span class="highlight">{{ school_name }}</span> has been successfully funded.</p>
+</div>
+
+<h2>Disbursement Details</h2>
+<table class="disbursement-details">
+    <tr>
+        <th>Disbursement Amount:</th>
+        <td>{{ disbursement_amount }}</td>
+    </tr>
+    <tr>
+        <th>Disbursement Date:</th>
+        <td>{{ disbursement_date|date:'F j, Y' }}</td>
+    </tr>
+    <tr>
+        <th>Disbursement Method:</th>
+        <td>{{ disbursement_method }}</td>
+    </tr>
+    <tr>
+        <th>Reference Number:</th>
+        <td>{{ reference_number }}</td>
+    </tr>
+    {% if start_date %}
+    <tr>
+        <th>Program Start Date:</th>
+        <td>{{ start_date|date:'F j, Y' }}</td>
+    </tr>
+    {% endif %}
+</table>
+
+<h2>School Information</h2>
+<p>The funds have been disbursed to {{ school_name }} according to the terms of your loan agreement.</p>
+
+<h2>Next Steps</h2>
+<p>Please contact your school's financial aid office if you have any questions about how these funds will be applied to your account.</p>
+
+<div class="button-container">
+    <a href="{{ application_url }}" class="button">View Application Details</a>
+</div>
+
+<p>If you have any questions about your loan, please contact our support team.</p>
+
+<p>Sincerely,<br>
+The Loan Management Team</p>
+{% endblock %}
