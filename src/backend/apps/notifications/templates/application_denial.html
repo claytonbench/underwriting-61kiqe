@@ -1,0 +1,88 @@
+{% extends 'emails/base.html' %}
+
+{% block styles %}
+{{ block.super }}
+/* Denial-specific styles */
+.denial-box {
+    background-color: #fff5f5;
+    border-left: 4px solid #D32F2F;
+    padding: 15px;
+    margin: 20px 0;
+    border-radius: 4px;
+}
+
+.denial-reasons {
+    margin: 15px 0;
+    padding-left: 20px;
+}
+
+.denial-reasons li {
+    margin-bottom: 8px;
+    color: #D32F2F;
+}
+
+.support-box {
+    background-color: #f5f9ff;
+    padding: 15px;
+    margin: 25px 0;
+    border-radius: 4px;
+    border-left: 4px solid #0288D1;
+}
+
+.next-steps li {
+    margin-bottom: 8px;
+}
+
+.button-container {
+    margin: 25px 0;
+    text-align: center;
+}
+{% endblock %}
+
+{% block content %}
+<h1>Loan Application Status Update</h1>
+
+<p>Dear {{ applicant_name }},</p>
+
+<div class="denial-box">
+    <p>We regret to inform you that your loan application ({{ application_id }}) for {{ program_name }} at {{ school_name }} has been denied.</p>
+</div>
+
+{% if denial_reasons %}
+<h2>Reasons for Denial</h2>
+<p>Your application was denied for the following reason(s):</p>
+<ul class="denial-reasons">
+    {% for reason in denial_reasons %}
+    <li>{{ reason.description }}</li>
+    {% endfor %}
+</ul>
+<p>These reasons are based on our underwriting criteria and the information provided in your application.</p>
+{% endif %}
+
+<h2>Next Steps</h2>
+<div class="next-steps">
+    <p>Here are some options you may consider:</p>
+    <ul>
+        <li>Review the denial reasons and address any issues that could be resolved for a future application.</li>
+        <li>Consider applying with a qualified co-borrower who may strengthen your application.</li>
+        <li>Explore alternative financing options with our support team.</li>
+        <li>Contact your school's financial aid office to discuss other available options.</li>
+    </ul>
+</div>
+
+<div class="support-box">
+    <h3>Need assistance?</h3>
+    <p>Our support team is available to discuss your application and alternative options. We're here to help you understand the decision and explore your next steps.</p>
+    <p>Phone: {{ support_phone|default:'(555) 123-4567' }}<br>
+       Email: {{ support_email|default:'support@loanmanagementsystem.com' }}<br>
+       Hours: Monday-Friday, 9:00 AM - 5:00 PM EST</p>
+</div>
+
+<div class="button-container">
+    <a href="{{ application_url }}" class="button">View Application Details</a>
+</div>
+
+<p>Thank you for your interest in our loan program.</p>
+
+<p>Sincerely,<br>The Loan Management Team</p>
+{% endblock %}
