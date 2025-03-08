@@ -1,0 +1,93 @@
+# Configuration file for Grafana data sources
+# Defines connections to various monitoring data stores including 
+# Prometheus, Elasticsearch, CloudWatch, MySQL, and Jaeger
+
+apiVersion: 1
+
+# List of data sources to be created in Grafana
+datasources:
+  # Prometheus - Primary metrics data source for application and infrastructure monitoring
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus-server:9090
+    isDefault: true
+    editable: false
+    jsonData:
+      timeInterval: 15s
+      httpMethod: GET
+      manageAlerts: true
+    version: 1
+
+  # Elasticsearch - Log aggregation data source for application logs and events
+  - name: Elasticsearch
+    type: elasticsearch
+    access: proxy
+    url: http://elasticsearch:9200
+    database: logs-*
+    isDefault: false
+    editable: false
+    jsonData:
+      timeField: "@timestamp"
+      esVersion: 7.10.0
+      maxConcurrentShardRequests: 5
+      logMessageField: message
+      logLevelField: level
+    version: 1
+
+  # CloudWatch - AWS CloudWatch metrics for AWS infrastructure components
+  - name: CloudWatch
+    type: cloudwatch
+    access: proxy
+    isDefault: false
+    editable: false
+    jsonData:
+      authType: arn
+      defaultRegion: us-east-1
+      assumeRoleArn: ${GRAFANA_AWS_ROLE_ARN}
+      externalId: ${GRAFANA_AWS_EXTERNAL_ID}
+      timeField: "@timestamp"
+    version: 1
+
+  # BusinessMetrics - Database connection for business metrics and KPIs
+  - name: BusinessMetrics
+    type: mysql
+    access: proxy
+    url: loan-management-reporting-db:3306
+    database: reporting
+    user: ${GRAFANA_MYSQL_USER}
+    secureJsonData:
+      password: ${GRAFANA_MYSQL_PASSWORD}
+    isDefault: false
+    editable: false
+    jsonData:
+      maxOpenConns: 10
+      maxIdleConns: 5
+      connMaxLifetime: 14400
+      timeInterval: "5m"
+    version: 1
+
+  # Jaeger - Distributed tracing data source for request tracing
+  - name: Jaeger
+    type: jaeger
+    access: proxy
+    url: http://jaeger-query:16686
+    isDefault: false
+    editable: false
+    jsonData:
+      nodeGraph:
+        enabled: true
+    version: 1
+
+# Delete data sources that are not defined in this file
+deleteDatasources:
+  - name: Prometheus
+    orgId: 1
+  - name: Elasticsearch
+    orgId: 1
+  - name: CloudWatch
+    orgId: 1
+  - name: BusinessMetrics
+    orgId: 1
+  - name: Jaeger
+    orgId: 1
