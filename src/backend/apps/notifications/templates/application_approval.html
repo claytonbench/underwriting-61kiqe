@@ -1,0 +1,103 @@
+{% extends 'emails/base.html' %}
+
+{% block styles %}
+{{ block.super }}
+/* Approval-specific styles */
+.approval-box {
+    background-color: #f0f9ff;
+    border-left: 4px solid #1976D2;
+    padding: 15px;
+    margin: 20px 0;
+    border-radius: 4px;
+}
+
+.loan-details {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+}
+
+.loan-details th {
+    text-align: left;
+    padding: 8px;
+    border-bottom: 1px solid #e0e0e0;
+    width: 40%;
+}
+
+.loan-details td {
+    padding: 8px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.stipulations {
+    margin: 15px 0;
+    padding-left: 20px;
+}
+
+.stipulations li {
+    margin-bottom: 8px;
+}
+
+.button-container {
+    margin: 25px 0;
+    text-align: center;
+}
+
+.button {
+    display: inline-block;
+    padding: 12px 24px;
+    background-color: #388E3C;
+    color: #ffffff;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    text-align: center;
+}
+{% endblock %}
+
+{% block content %}
+<h1>Loan Application Approved</h1>
+
+<p>Dear {{ applicant_name }},</p>
+
+<div class="approval-box">
+    <p>We are pleased to inform you that your loan application ({{ application_id }}) for {{ program_name }} at {{ school_name }} has been approved for {{ approved_amount }}.</p>
+</div>
+
+<h2>Loan Details</h2>
+<table class="loan-details">
+    <tr>
+        <th>Approved Amount:</th>
+        <td>{{ approved_amount }}</td>
+    </tr>
+    <tr>
+        <th>Interest Rate:</th>
+        <td>{{ interest_rate }}%</td>
+    </tr>
+    <tr>
+        <th>Term:</th>
+        <td>{{ term_months }} months</td>
+    </tr>
+</table>
+
+{% if stipulations %}
+<h2>Required Stipulations</h2>
+<ul class="stipulations">
+    {% for stipulation in stipulations %}
+    <li>{{ stipulation.description }} (Required by: {{ stipulation.required_by_date|date:'F j, Y' }})</li>
+    {% endfor %}
+</ul>
+{% endif %}
+
+<h2>Next Steps</h2>
+<p>The next step is to review and sign your loan documents. You will receive another email when your documents are ready for signature.</p>
+
+<div class="button-container">
+    <a href="{{ application_url }}" class="button">View Application Details</a>
+</div>
+
+<p>If you have any questions, please contact our support team.</p>
+
+<p>Sincerely,<br>
+The Loan Management Team</p>
+{% endblock %}
