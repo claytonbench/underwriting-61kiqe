@@ -1,0 +1,225 @@
+# =====================================================
+# Elasticsearch Configuration for Loan Management System
+# Version: 7.17.0
+# =====================================================
+
+# =====================================================
+# Cluster Configuration
+# =====================================================
+cluster:
+  name: loan-management-elasticsearch
+  initial_master_nodes: ["node-1"]
+  routing:
+    allocation:
+      disk.threshold_enabled: true
+      disk.watermark.low: "85%"
+      disk.watermark.high: "90%"
+      disk.watermark.flood_stage: "95%"
+
+# =====================================================
+# Node Configuration
+# =====================================================
+node:
+  name: ${HOSTNAME}
+  master: true
+  data: true
+  ingest: true
+  max_local_storage_nodes: 1
+  attr.zone: ${AVAILABILITY_ZONE}
+
+# =====================================================
+# Path Configuration
+# =====================================================
+path:
+  data: /var/lib/elasticsearch/data
+  logs: /var/log/elasticsearch
+
+# =====================================================
+# Network Configuration
+# =====================================================
+network:
+  host: 0.0.0.0
+  port: 9200
+  publish_host: ${PUBLISH_HOST}
+  bind_host: ["0.0.0.0"]
+
+# =====================================================
+# Discovery Configuration
+# =====================================================
+discovery:
+  seed_hosts: ["${SEED_HOSTS:node-1}"]
+  type: single-node
+
+# =====================================================
+# HTTP Configuration
+# =====================================================
+http:
+  port: 9200
+  compression: true
+  cors:
+    enabled: true
+    allow-origin: ["https://${KIBANA_HOST}", "https://${LOGSTASH_HOST}"]
+
+# =====================================================
+# Transport Configuration
+# =====================================================
+transport:
+  port: 9300
+  compress: true
+
+# =====================================================
+# Security Configuration
+# =====================================================
+xpack:
+  security:
+    enabled: true
+    transport:
+      ssl:
+        enabled: true
+        verification_mode: certificate
+        keystore.path: /etc/elasticsearch/certificates/elastic-certificates.p12
+        truststore.path: /etc/elasticsearch/certificates/elastic-certificates.p12
+    http:
+      ssl:
+        enabled: true
+        keystore.path: /etc/elasticsearch/certificates/elastic-certificates.p12
+        truststore.path: /etc/elasticsearch/certificates/elastic-certificates.p12
+  monitoring:
+    collection:
+      enabled: true
+  watcher:
+    enabled: true
+  ml:
+    enabled: false
+
+# =====================================================
+# Indices Configuration
+# =====================================================
+indices:
+  recovery:
+    max_bytes_per_sec: "50mb"
+  fielddata:
+    cache.size: "20%"
+  query:
+    bool.max_clause_count: 2048
+  memory:
+    index_buffer_size: "15%"
+
+# =====================================================
+# Thread Pool Configuration
+# =====================================================
+thread_pool:
+  search:
+    size: 5
+    queue_size: 1000
+  write:
+    size: 5
+    queue_size: 1000
+  get:
+    size: 5
+    queue_size: 1000
+
+# =====================================================
+# Action Configuration
+# =====================================================
+action:
+  destructive_requires_name: true
+
+# =====================================================
+# Bootstrap Configuration
+# =====================================================
+bootstrap:
+  memory_lock: true
+
+# =====================================================
+# Gateway Configuration
+# =====================================================
+gateway:
+  recover_after_nodes: 1
+  recover_after_time: "5m"
+  expected_nodes: 1
+
+# =====================================================
+# Search Configuration
+# =====================================================
+search:
+  max_buckets: 10000
+
+# =====================================================
+# Index Lifecycle Management
+# =====================================================
+ilm:
+  enabled: true
+  policies:
+    loan-management-policy:
+      phases:
+        hot:
+          min_age: "0ms"
+          actions:
+            rollover:
+              max_age: "7d"
+              max_size: "50gb"
+            set_priority:
+              priority: 100
+        warm:
+          min_age: "30d"
+          actions:
+            shrink:
+              number_of_shards: 1
+            forcemerge:
+              max_num_segments: 1
+            set_priority:
+              priority: 50
+        cold:
+          min_age: "90d"
+          actions:
+            freeze: {}
+            set_priority:
+              priority: 0
+        delete:
+          min_age: "365d"
+          actions:
+            delete: {}
+
+# =====================================================
+# Environment Variables Reference
+# =====================================================
+# HOSTNAME:          Hostname for the Elasticsearch node
+# AVAILABILITY_ZONE: AWS availability zone for the node
+# PUBLISH_HOST:      Host address to publish for other nodes to connect to
+# SEED_HOSTS:        Comma-separated list of seed hosts for cluster discovery (default: node-1)
+# KIBANA_HOST:       Hostname or IP address for Kibana for CORS configuration
+# LOGSTASH_HOST:     Hostname or IP address for Logstash for CORS configuration
+# ES_JAVA_OPTS:      -Xms4g -Xmx4g (recommended JVM options)
+
+# =====================================================
+# Resource Requirements
+# =====================================================
+# Memory: 8GB minimum, 16GB recommended
+# CPU: 4 vCPU minimum, 8 vCPU recommended
+# Disk: 100GB minimum, SSD storage recommended
+# Network: 1Gbps minimum
+
+# =====================================================
+# Security Configuration Notes
+# =====================================================
+# This configuration enables:
+# - SSL encryption for HTTP and Transport
+# - Role-based access control
+# - Field and document level security
+# - Audit logging for security events
+#
+# For production deployments, ensure proper certificate management and
+# secure storage of authentication credentials.
+
+# =====================================================
+# Index Lifecycle Notes
+# =====================================================
+# The configured ILM policy (loan-management-policy) provides:
+# - Hot phase: Active indices for recent logs (7 days)
+# - Warm phase: Older logs with reduced resources (30-90 days)
+# - Cold phase: Historical logs for occasional access (90-365 days)
+# - Delete phase: Automatic removal after retention period (365 days)
+#
+# This aligns with compliance requirements for log retention while
+# optimizing storage and performance.
