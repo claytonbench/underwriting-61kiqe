@@ -1,0 +1,245 @@
+name: Deploy to Staging
+
+on:
+  push:
+    branches:
+      - staging
+  workflow_dispatch:
+
+jobs:
+  deploy-backend:
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: 'us-east-1'
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to Amazon ECR
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ secrets.AWS_ECR_REGISTRY }}
+          username: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          password: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Extract metadata for Docker
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ secrets.AWS_ECR_REGISTRY }}/loan-management-backend
+          tags: |
+            type=ref,event=branch
+            type=sha,format=short
+            staging
+
+      - name: Build and push backend Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./src/backend
+          file: ./infrastructure/docker/backend.Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: ENVIRONMENT=staging
+
+      - name: Create new task definition revision
+        run: |
+          aws ecs describe-task-definition --task-definition loan-management-backend-staging --query taskDefinition > task-definition.json
+          jq '.containerDefinitions[0].image = "${{ secrets.AWS_ECR_REGISTRY }}/loan-management-backend:staging"' task-definition.json > new-task-definition.json
+          aws ecs register-task-definition --cli-input-json file://new-task-definition.json
+
+      - name: Create blue/green deployment
+        run: |
+          aws deploy create-deployment \
+            --application-name loan-management-backend \
+            --deployment-group-name loan-management-backend-staging \
+            --revision revisionType=AppSpecContent,appSpecContent={content='version: 0.0,Resources: [{TargetService: {Type: AWS::ECS::Service,Properties: {TaskDefinition: "loan-management-backend-staging",LoadBalancerInfo: {ContainerName: "loan-management-backend",ContainerPort: 8000}}}}]'} \
+            --deployment-config-name CodeDeployDefault.ECSCanary10Percent5Minutes
+
+  deploy-frontend:
+    needs: [deploy-backend]
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'yarn'
+          cache-dependency-path: 'src/web/yarn.lock'
+
+      - name: Install dependencies
+        run: cd src/web && yarn install --frozen-lockfile
+
+      - name: Build frontend
+        run: cd src/web && yarn build
+        env:
+          REACT_APP_API_URL: ${{ secrets.STAGING_API_URL }}
+          REACT_APP_AUTH0_DOMAIN: ${{ secrets.AUTH0_DOMAIN }}
+          REACT_APP_AUTH0_CLIENT_ID: ${{ secrets.AUTH0_CLIENT_ID }}
+          REACT_APP_AUTH0_AUDIENCE: ${{ secrets.AUTH0_AUDIENCE }}
+          REACT_APP_ENVIRONMENT: 'staging'
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: 'us-east-1'
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to Amazon ECR
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ secrets.AWS_ECR_REGISTRY }}
+          username: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          password: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Extract metadata for Docker
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ secrets.AWS_ECR_REGISTRY }}/loan-management-frontend
+          tags: |
+            type=ref,event=branch
+            type=sha,format=short
+            staging
+
+      - name: Build and push frontend Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./src/web
+          file: ./infrastructure/docker/frontend.Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            REACT_APP_API_URL=${{ secrets.STAGING_API_URL }}
+            REACT_APP_AUTH0_DOMAIN=${{ secrets.AUTH0_DOMAIN }}
+            REACT_APP_AUTH0_CLIENT_ID=${{ secrets.AUTH0_CLIENT_ID }}
+            REACT_APP_AUTH0_AUDIENCE=${{ secrets.AUTH0_AUDIENCE }}
+
+      - name: Create new task definition revision
+        run: |
+          aws ecs describe-task-definition --task-definition loan-management-frontend-staging --query taskDefinition > task-definition.json
+          jq '.containerDefinitions[0].image = "${{ secrets.AWS_ECR_REGISTRY }}/loan-management-frontend:staging"' task-definition.json > new-task-definition.json
+          aws ecs register-task-definition --cli-input-json file://new-task-definition.json
+
+      - name: Create blue/green deployment
+        run: |
+          aws deploy create-deployment \
+            --application-name loan-management-frontend \
+            --deployment-group-name loan-management-frontend-staging \
+            --revision revisionType=AppSpecContent,appSpecContent={content='version: 0.0,Resources: [{TargetService: {Type: AWS::ECS::Service,Properties: {TaskDefinition: "loan-management-frontend-staging",LoadBalancerInfo: {ContainerName: "loan-management-frontend",ContainerPort: 80}}}}]'} \
+            --deployment-config-name CodeDeployDefault.ECSCanary10Percent5Minutes
+
+      - name: Invalidate CloudFront cache
+        run: |
+          aws cloudfront create-invalidation --distribution-id ${{ secrets.STAGING_CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
+
+  integration-tests:
+    needs: [deploy-frontend]
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install test dependencies
+        run: pip install -r src/backend/requirements-dev.txt
+
+      - name: Wait for services to stabilize
+        run: sleep 120
+
+      - name: Run API integration tests
+        run: pytest src/backend/tests/integration/ --base-url=${{ secrets.STAGING_API_URL }}
+        env:
+          TEST_USERNAME: ${{ secrets.TEST_USERNAME }}
+          TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}
+
+      - name: Run end-to-end tests
+        run: cd src/web && yarn test:e2e
+        env:
+          CYPRESS_BASE_URL: ${{ secrets.STAGING_APP_URL }}
+          CYPRESS_TEST_USERNAME: ${{ secrets.TEST_USERNAME }}
+          CYPRESS_TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}
+
+      - name: Complete deployment
+        run: |
+          aws deploy continue-deployment --deployment-id $(aws deploy list-deployments --application-name loan-management-backend --deployment-group-name loan-management-backend-staging --query 'deployments[0]' --output text) --deployment-wait-type READY_WAIT
+          aws deploy continue-deployment --deployment-id $(aws deploy list-deployments --application-name loan-management-frontend --deployment-group-name loan-management-frontend-staging --query 'deployments[0]' --output text) --deployment-wait-type READY_WAIT
+
+      - name: Send deployment notification
+        uses: slackapi/slack-github-action@v1.23.0
+        with:
+          channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
+          slack-message: 'Staging deployment completed successfully! :rocket: 
+Environment: Staging
+Commit: ${{ github.sha }}
+Deployed by: ${{ github.actor }}'
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
+  rollback:
+    if: failure()
+    needs: [deploy-backend, deploy-frontend, integration-tests]
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: 'us-east-1'
+
+      - name: Rollback backend deployment
+        run: |
+          aws deploy stop-deployment --deployment-id $(aws deploy list-deployments --application-name loan-management-backend --deployment-group-name loan-management-backend-staging --query 'deployments[0]' --output text) --auto-rollback-enabled
+
+      - name: Rollback frontend deployment
+        run: |
+          aws deploy stop-deployment --deployment-id $(aws deploy list-deployments --application-name loan-management-frontend --deployment-group-name loan-management-frontend-staging --query 'deployments[0]' --output text) --auto-rollback-enabled
+
+      - name: Wait for rollback to complete
+        run: |
+          aws ecs wait services-stable --cluster loan-management-staging --services loan-management-backend-staging loan-management-frontend-staging
+
+      - name: Invalidate CloudFront cache after rollback
+        run: |
+          aws cloudfront create-invalidation --distribution-id ${{ secrets.STAGING_CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
+
+      - name: Send rollback notification
+        uses: slackapi/slack-github-action@v1.23.0
+        with:
+          channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
+          slack-message: '⚠️ Staging deployment failed and has been rolled back! 
+Environment: Staging
+Commit: ${{ github.sha }}
+Triggered by: ${{ github.actor }}'
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
