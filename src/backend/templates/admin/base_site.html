@@ -1,0 +1,71 @@
+{% extends "admin/base.html" %}
+
+{% block title %}{{ title }} | Loan Management System Admin{% endblock %}
+
+{% block branding %}
+<h1 id="site-name"><a href="{% url 'admin:index' %}">Loan Management System Administration</a></h1>
+{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+:root {
+  --primary: #1976D2;
+  --secondary: #388E3C;
+  --accent: #0288D1;
+  --primary-fg: #fff;
+  --body-fg: #212121;
+  --body-bg: #F5F5F5;
+  --header-color: #1976D2;
+  --header-branding-color: var(--primary-fg);
+  --header-bg: var(--primary);
+  --header-link-color: var(--primary-fg);
+}
+
+body {
+  font-family: 'Roboto', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+#header {
+  background: var(--header-bg);
+  color: var(--header-branding-color);
+}
+
+#branding h1 {
+  font-weight: 500;
+}
+
+.module h2, .module caption, .inline-group h2 {
+  background: var(--header-bg);
+}
+
+div.breadcrumbs {
+  background: var(--secondary);
+}
+
+a:link, a:visited {
+  color: var(--header-bg);
+}
+
+.button, input[type=submit], input[type=button], .submit-row input, a.button {
+  background: var(--primary);
+}
+
+.button.default, input[type=submit].default, .submit-row input.default {
+  background: var(--secondary);
+}
+
+.button:active, input[type=submit]:active, input[type=button]:active, .button:focus, input[type=submit]:focus, input[type=button]:focus, .button:hover, input[type=submit]:hover, input[type=button]:hover {
+  background: var(--accent);
+}
+
+.button.default:active, input[type=submit].default:active, .button.default:focus, input[type=submit].default:focus, .button.default:hover, input[type=submit].default:hover {
+  background: #2e7d32;
+}
+</style>
+{% endblock %}
