@@ -1,0 +1,20 @@
+build/
+dist/
+# Dependencies
+node_modules/
+# Test coverage
+coverage/
+# Configuration files
+*.config.js
+craco.config.ts
+# Public assets
+public/
+# Generated files
+*.generated.*
+src/react-app-env.d.ts
+# Third-party code
+src/assets/fonts/
+# Test files
+**/*.test.tsx
+**/*.test.ts
+src/setupTests.ts
